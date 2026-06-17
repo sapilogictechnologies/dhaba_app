@@ -1,35 +1,36 @@
-import { useEffect, useRef } from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { io } from 'socket.io-client';
-import { useDispatch, useSelector } from 'react-redux';
-import { baseApi } from './api/baseApi.js';
-import Layout from './components/Layout.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
-import { useToast } from './components/Toast.jsx';
-import { playSound, unlockAudio } from './utils/sounds.js';
-import { setCustomerCredentials } from './features/customerAuthSlice.js';
-import { getCustomerToken } from './utils/customerAuth.js';
+import { useEffect, useRef } from "react";
+import { Route, Routes } from "react-router-dom";
+import { io } from "socket.io-client";
+import { useDispatch, useSelector } from "react-redux";
+import { baseApi } from "./api/baseApi.js";
+import Layout from "./components/Layout.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { useToast } from "./components/Toast.jsx";
+import { playSound, unlockAudio } from "./utils/sounds.js";
+import { setCustomerCredentials } from "./features/customerAuthSlice.js";
+import { getCustomerToken } from "./utils/customerAuth.js";
 
-import LoginPage from './pages/LoginPage.jsx';
-import LandingPage from './pages/LandingPage.jsx';
-import DashboardPage from './pages/DashboardPage.jsx';
-import SettingsPage from './pages/SettingsPage.jsx';
-import MenuPage from './pages/MenuPage.jsx';
-import TablesPage from './pages/TablesPage.jsx';
-import StaffOrdersPage from './pages/StaffOrdersPage.jsx';
-import CustomerOrderPage from './pages/CustomerOrderPage.jsx';
-import KitchenPage from './pages/KitchenPage.jsx';
-import AdminOrdersPage from './pages/AdminOrdersPage.jsx';
-import BillingPage from './pages/BillingPage.jsx';
-import ReportsPage from './pages/ReportsPage.jsx';
-import ExpensesPage from './pages/ExpensesPage.jsx';
-import RealtimePage from './pages/RealtimePage.jsx';
-import OrderStatusPage from './pages/OrderStatusPage.jsx';
-import MyOrdersPage from './pages/MyOrdersPage.jsx';
-import CustomerLoginPage from './pages/CustomerLoginPage.jsx';
-import CustomerAccountPage from './pages/CustomerAccountPage.jsx';
+import LoginPage from "./pages/LoginPage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
+import DashboardPage from "./pages/DashboardPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
+import MenuPage from "./pages/MenuPage.jsx";
+import TablesPage from "./pages/TablesPage.jsx";
+import StaffOrdersPage from "./pages/StaffOrdersPage.jsx";
+import CustomerOrderPage from "./pages/CustomerOrderPage.jsx";
+import KitchenPage from "./pages/KitchenPage.jsx";
+import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
+import BillingPage from "./pages/BillingPage.jsx";
+import ReportsPage from "./pages/ReportsPage.jsx";
+import ExpensesPage from "./pages/ExpensesPage.jsx";
+import RealtimePage from "./pages/RealtimePage.jsx";
+import OrderStatusPage from "./pages/OrderStatusPage.jsx";
+import MyOrdersPage from "./pages/MyOrdersPage.jsx";
+import CustomerLoginPage from "./pages/CustomerLoginPage.jsx";
+import CustomerAccountPage from "./pages/CustomerAccountPage.jsx";
 
-const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+const socketUrl =
+  import.meta.env.VITE_SOCKET_URL || "https://dhaba-app.onrender.com";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -44,16 +45,16 @@ const App = () => {
     if (storedToken && !custToken) {
       dispatch(setCustomerCredentials({ token: storedToken, user: null }));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const unlock = () => unlockAudio();
-    document.addEventListener('click', unlock, { once: true });
-    document.addEventListener('touchstart', unlock, { once: true });
+    document.addEventListener("click", unlock, { once: true });
+    document.addEventListener("touchstart", unlock, { once: true });
     return () => {
-      document.removeEventListener('click', unlock);
-      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("touchstart", unlock);
     };
   }, []);
 
@@ -63,43 +64,48 @@ const App = () => {
     const socket = io(socketUrl, { auth: { token }, reconnectionDelay: 2000 });
     socketRef.current = socket;
 
-    socket.emit('join', { role: user.role });
+    socket.emit("join", { role: user.role });
 
-    const invalidateOrders = () => dispatch(baseApi.util.invalidateTags(['Orders', 'Reports', 'Tables']));
-    const invalidateMenu = () => dispatch(baseApi.util.invalidateTags(['Menu']));
+    const invalidateOrders = () =>
+      dispatch(baseApi.util.invalidateTags(["Orders", "Reports", "Tables"]));
+    const invalidateMenu = () =>
+      dispatch(baseApi.util.invalidateTags(["Menu"]));
 
-    socket.on('order:new', (data) => {
+    socket.on("order:new", (data) => {
       invalidateOrders();
       playSound(data.soundType, `new-${data.orderNo}`);
-      toast(`New order ${data.orderNo} — ${data.source?.replace(/_/g, ' ')}`, 'info');
+      toast(
+        `New order ${data.orderNo} — ${data.source?.replace(/_/g, " ")}`,
+        "info",
+      );
     });
 
-    socket.on('order:update', (data) => {
+    socket.on("order:update", (data) => {
       invalidateOrders();
-      if (data.status === 'READY') {
-        playSound('NOTIFY_SOUND', `ready-${data.orderNo}`);
-        toast(`Order ${data.orderNo} is READY`, 'success');
+      if (data.status === "READY") {
+        playSound("NOTIFY_SOUND", `ready-${data.orderNo}`);
+        toast(`Order ${data.orderNo} is READY`, "success");
       }
-      if (data.status === 'CANCELLED') {
-        toast(`Order ${data.orderNo} cancelled`, 'error');
+      if (data.status === "CANCELLED") {
+        toast(`Order ${data.orderNo} cancelled`, "error");
       }
     });
 
-    socket.on('order:payment_under_review', (data) => {
+    socket.on("order:payment_under_review", (data) => {
       invalidateOrders();
-      playSound('PAYMENT_SOUND', `pay-${data.orderNo}`);
-      toast(`Payment review needed — ${data.orderNo}`, 'warn');
+      playSound("PAYMENT_SOUND", `pay-${data.orderNo}`);
+      toast(`Payment review needed — ${data.orderNo}`, "warn");
     });
 
-    socket.on('order:call_waiter', (data) => {
+    socket.on("order:call_waiter", (data) => {
       invalidateOrders();
-      playSound('WAITER_SOUND', `waiter-${data.orderNo}`);
-      toast(`🔔 Waiter called — ${data.message || data.orderNo}`, 'warn');
+      playSound("WAITER_SOUND", `waiter-${data.orderNo}`);
+      toast(`🔔 Waiter called — ${data.message || data.orderNo}`, "warn");
     });
 
-    socket.on('menu:stock_changed', () => {
+    socket.on("menu:stock_changed", () => {
       invalidateMenu();
-      toast('Menu stock updated', 'info');
+      toast("Menu stock updated", "info");
     });
 
     return () => {
@@ -126,14 +132,13 @@ const App = () => {
           <ProtectedRoute>
             <Layout />
           </ProtectedRoute>
-        }
-      >
+        }>
         <Route path="/dashboard" element={<DashboardPage />} />
 
         <Route
           path="settings"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN']}>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <SettingsPage />
             </ProtectedRoute>
           }
@@ -142,7 +147,7 @@ const App = () => {
         <Route
           path="menu"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'STAFF', 'KITCHEN']}>
+            <ProtectedRoute allowedRoles={["ADMIN", "STAFF", "KITCHEN"]}>
               <MenuPage />
             </ProtectedRoute>
           }
@@ -151,7 +156,7 @@ const App = () => {
         <Route
           path="tables"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+            <ProtectedRoute allowedRoles={["ADMIN", "STAFF"]}>
               <TablesPage />
             </ProtectedRoute>
           }
@@ -160,7 +165,7 @@ const App = () => {
         <Route
           path="staff-orders"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+            <ProtectedRoute allowedRoles={["ADMIN", "STAFF"]}>
               <StaffOrdersPage />
             </ProtectedRoute>
           }
@@ -169,7 +174,7 @@ const App = () => {
         <Route
           path="kitchen"
           element={
-            <ProtectedRoute allowedRoles={['KITCHEN', 'ADMIN']}>
+            <ProtectedRoute allowedRoles={["KITCHEN", "ADMIN"]}>
               <KitchenPage />
             </ProtectedRoute>
           }
@@ -178,7 +183,7 @@ const App = () => {
         <Route
           path="admin-orders"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN']}>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <AdminOrdersPage />
             </ProtectedRoute>
           }
@@ -187,7 +192,7 @@ const App = () => {
         <Route
           path="billing"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+            <ProtectedRoute allowedRoles={["ADMIN", "STAFF"]}>
               <BillingPage />
             </ProtectedRoute>
           }
@@ -196,7 +201,7 @@ const App = () => {
         <Route
           path="reports"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+            <ProtectedRoute allowedRoles={["ADMIN", "STAFF"]}>
               <ReportsPage />
             </ProtectedRoute>
           }
@@ -205,7 +210,7 @@ const App = () => {
         <Route
           path="expenses"
           element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+            <ProtectedRoute allowedRoles={["ADMIN", "STAFF"]}>
               <ExpensesPage />
             </ProtectedRoute>
           }
