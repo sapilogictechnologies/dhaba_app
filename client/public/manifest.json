@@ -1,0 +1,31 @@
+{
+  "name": "Dhaba Management",
+  "short_name": "Dhaba",
+  "description": "Dhaba Restaurant Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e3a5f",
+  "theme_color": "#1e3a5f",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["food", "business"],
+  "shortcuts": [
+    {
+      "name": "Kitchen Display",
+      "url": "/kitchen",
+      "description": "Open kitchen display system"
+    },
+    {
+      "name": "Place Order",
+      "url": "/order",
+      "description": "Customer ordering page"
+    }
+  ]
+}
